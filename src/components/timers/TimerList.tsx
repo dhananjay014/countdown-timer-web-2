@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import Box from '@mui/material/Box';
 import Fab from '@mui/material/Fab';
 import AddIcon from '@mui/icons-material/Add';
@@ -13,15 +13,15 @@ export function TimerList() {
   const [formOpen, setFormOpen] = useState(false);
   const [editingTimer, setEditingTimer] = useState<Timer | null>(null);
 
-  const handleEdit = (timer: Timer) => {
+  const handleEdit = useCallback((timer: Timer) => {
     setEditingTimer(timer);
     setFormOpen(true);
-  };
+  }, []);
 
-  const handleClose = () => {
+  const handleClose = useCallback(() => {
     setFormOpen(false);
     setEditingTimer(null);
-  };
+  }, []);
 
   return (
     <Box>
@@ -34,7 +34,15 @@ export function TimerList() {
           ))}
         </Box>
       )}
-      <Fab color="primary" onClick={() => setFormOpen(true)} sx={{ position: 'fixed', bottom: 24, right: 24 }}>
+      <Fab
+        color="primary"
+        onClick={() => setFormOpen(true)}
+        sx={{
+          position: 'fixed', bottom: 24, right: 24,
+          transition: 'transform 0.2s ease',
+          '&:hover': { transform: 'scale(1.1)' },
+        }}
+      >
         <AddIcon />
       </Fab>
       <TimerForm open={formOpen} timer={editingTimer} onClose={handleClose} />

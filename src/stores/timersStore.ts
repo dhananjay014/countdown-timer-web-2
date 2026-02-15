@@ -16,6 +16,7 @@ interface TimersState {
   tickTimers: () => void;
   dismissAlarm: (id: string) => void;
   dismissAllAlarms: () => void;
+  resetAndDismissAll: () => void;
 }
 
 export const useTimersStore = create<TimersState>()(
@@ -26,14 +27,9 @@ export const useTimersStore = create<TimersState>()(
 
       addTimer: (label, hours, minutes, seconds) =>
         set((state) => {
-          if (state.timers.length >= MAX_TIMERS) {
-            return state;
-          }
-
+          if (state.timers.length >= MAX_TIMERS) return state;
           const totalSeconds = hours * 3600 + minutes * 60 + seconds;
-          if (totalSeconds <= 0) {
-            return state;
-          }
+          if (totalSeconds <= 0) return state;
 
           const newTimer: Timer = {
             id: generateId(),
@@ -54,22 +50,12 @@ export const useTimersStore = create<TimersState>()(
       updateTimer: (id, label, hours, minutes, seconds) =>
         set((state) => {
           const totalSeconds = hours * 3600 + minutes * 60 + seconds;
-          if (totalSeconds <= 0) {
-            return state;
-          }
+          if (totalSeconds <= 0) return state;
 
           return {
             timers: state.timers.map((timer) =>
               timer.id === id && timer.status === 'idle'
-                ? {
-                    ...timer,
-                    label,
-                    hours,
-                    minutes,
-                    seconds,
-                    totalSeconds,
-                    remainingTime: totalSeconds,
-                  }
+                ? { ...timer, label, hours, minutes, seconds, totalSeconds, remainingTime: totalSeconds }
                 : timer
             ),
           };
@@ -85,11 +71,7 @@ export const useTimersStore = create<TimersState>()(
         set((state) => ({
           timers: state.timers.map((timer) =>
             timer.id === id && (timer.status === 'idle' || timer.status === 'paused')
-              ? {
-                  ...timer,
-                  status: 'running' as const,
-                  endTime: Date.now() + timer.remainingTime * 1000,
-                }
+              ? { ...timer, status: 'running' as const, endTime: Date.now() + timer.remainingTime * 1000 }
               : timer
           ),
         })),
@@ -98,14 +80,8 @@ export const useTimersStore = create<TimersState>()(
         set((state) => ({
           timers: state.timers.map((timer) => {
             if (timer.id === id && timer.status === 'running' && timer.endTime) {
-              const now = Date.now();
-              const remaining = Math.max(0, Math.ceil((timer.endTime - now) / 1000));
-              return {
-                ...timer,
-                status: 'paused' as const,
-                remainingTime: remaining,
-                endTime: null,
-              };
+              const remaining = Math.max(0, Math.ceil((timer.endTime - Date.now()) / 1000));
+              return { ...timer, status: 'paused' as const, remainingTime: remaining, endTime: null };
             }
             return timer;
           }),
@@ -115,12 +91,7 @@ export const useTimersStore = create<TimersState>()(
         set((state) => ({
           timers: state.timers.map((timer) =>
             timer.id === id
-              ? {
-                  ...timer,
-                  status: 'idle' as const,
-                  remainingTime: timer.totalSeconds,
-                  endTime: null,
-                }
+              ? { ...timer, status: 'idle' as const, remainingTime: timer.totalSeconds, endTime: null }
               : timer
           ),
           completedTimerIds: state.completedTimerIds.filter((timerId) => timerId !== id),
@@ -134,21 +105,11 @@ export const useTimersStore = create<TimersState>()(
           const updatedTimers = state.timers.map((timer) => {
             if (timer.status === 'running' && timer.endTime) {
               const remaining = Math.ceil((timer.endTime - now) / 1000);
-
               if (remaining <= 0) {
                 newCompletedIds.push(timer.id);
-                return {
-                  ...timer,
-                  status: 'completed' as const,
-                  remainingTime: 0,
-                  endTime: null,
-                };
-              } else {
-                return {
-                  ...timer,
-                  remainingTime: remaining,
-                };
+                return { ...timer, status: 'completed' as const, remainingTime: 0, endTime: null };
               }
+              return { ...timer, remainingTime: remaining };
             }
             return timer;
           });
@@ -165,15 +126,31 @@ export const useTimersStore = create<TimersState>()(
         })),
 
       dismissAllAlarms: () =>
-        set(() => ({
+        set(() => ({ completedTimerIds: [] })),
+
+      resetAndDismissAll: () =>
+        set((state) => ({
+          timers: state.timers.map((timer) =>
+            state.completedTimerIds.includes(timer.id)
+              ? { ...timer, status: 'idle' as const, remainingTime: timer.totalSeconds, endTime: null }
+              : timer
+          ),
           completedTimerIds: [],
         })),
     }),
     {
       name: 'countdown-timers',
-      partialize: (state) => ({
-        timers: state.timers,
-      }),
+      partialize: (state) => ({ timers: state.timers }),
     }
   )
 );
+
+// Optimized selectors
+export const selectTimers = (s: TimersState) => s.timers;
+export const selectCompletedTimerIds = (s: TimersState) => s.completedTimerIds;
+export const selectTimerActions = (s: TimersState) => ({
+  startTimer: s.startTimer,
+  pauseTimer: s.pauseTimer,
+  resetTimer: s.resetTimer,
+  deleteTimer: s.deleteTimer,
+});

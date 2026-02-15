@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import Box from '@mui/material/Box';
 import { useTheme } from '@mui/material/styles';
 
@@ -8,7 +9,7 @@ interface ProgressRingProps {
   children?: React.ReactNode;
 }
 
-export function ProgressRing({ progress, size = 140, strokeWidth = 6, children }: ProgressRingProps) {
+export const ProgressRing = memo(function ProgressRing({ progress, size = 140, strokeWidth = 6, children }: ProgressRingProps) {
   const theme = useTheme();
   const radius = (size - strokeWidth) / 2;
   const circumference = 2 * Math.PI * radius;
@@ -39,4 +40,4 @@ export function ProgressRing({ progress, size = 140, strokeWidth = 6, children }
       </Box>
     </Box>
   );
-}
+});

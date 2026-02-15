@@ -25,24 +25,23 @@ export function useAlarm() {
     oscillator.stop(ctx.currentTime + 0.2);
   }, [getContext]);
 
-  const startAlarm = useCallback(() => {
-    const { soundEnabled, volume } = useSettingsStore.getState();
-    if (!soundEnabled) return;
-    // Play immediately then every 500ms
-    playBeep(volume);
-    intervalRef.current = window.setInterval(() => {
-      const { soundEnabled: s, volume: v } = useSettingsStore.getState();
-      if (!s) { stopAlarm(); return; }
-      playBeep(v);
-    }, 500);
-  }, [playBeep]);
-
   const stopAlarm = useCallback(() => {
     if (intervalRef.current !== null) {
       clearInterval(intervalRef.current);
       intervalRef.current = null;
     }
   }, []);
+
+  const startAlarm = useCallback(() => {
+    const { soundEnabled, volume } = useSettingsStore.getState();
+    if (!soundEnabled) return;
+    playBeep(volume);
+    intervalRef.current = window.setInterval(() => {
+      const { soundEnabled: s, volume: v } = useSettingsStore.getState();
+      if (!s) { stopAlarm(); return; }
+      playBeep(v);
+    }, 500);
+  }, [playBeep, stopAlarm]);
 
   return { startAlarm, stopAlarm };
 }

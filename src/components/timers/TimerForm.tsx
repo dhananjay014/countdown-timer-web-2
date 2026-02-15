@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import Dialog from '@mui/material/Dialog';
 import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
@@ -15,26 +15,34 @@ interface TimerFormProps {
   onClose: () => void;
 }
 
+function getDefaults(timer: Timer | null | undefined) {
+  if (timer) {
+    return { label: timer.label, hours: timer.hours, minutes: timer.minutes, seconds: timer.seconds };
+  }
+  return { label: '', hours: 0, minutes: 5, seconds: 0 };
+}
+
 export function TimerForm({ open, timer, onClose }: TimerFormProps) {
   const { addTimer, updateTimer } = useTimersStore();
-  const [label, setLabel] = useState('');
-  const [hours, setHours] = useState(0);
-  const [minutes, setMinutes] = useState(0);
-  const [seconds, setSeconds] = useState(0);
+  const defaults = getDefaults(timer);
+  const [label, setLabel] = useState(defaults.label);
+  const [hours, setHours] = useState(defaults.hours);
+  const [minutes, setMinutes] = useState(defaults.minutes);
+  const [seconds, setSeconds] = useState(defaults.seconds);
 
-  useEffect(() => {
-    if (timer) {
-      setLabel(timer.label);
-      setHours(timer.hours);
-      setMinutes(timer.minutes);
-      setSeconds(timer.seconds);
-    } else {
-      setLabel('');
-      setHours(0);
-      setMinutes(5);
-      setSeconds(0);
+  // Reset form when dialog opens with new data
+  const [prevKey, setPrevKey] = useState<string | null>(null);
+  const key = open ? (timer?.id ?? '__new__') : null;
+  if (key !== prevKey) {
+    setPrevKey(key);
+    if (key !== null) {
+      const d = getDefaults(timer);
+      setLabel(d.label);
+      setHours(d.hours);
+      setMinutes(d.minutes);
+      setSeconds(d.seconds);
     }
-  }, [timer, open]);
+  }
 
   const handleSave = () => {
     const h = Math.max(0, Math.min(99, hours));
@@ -55,9 +63,9 @@ export function TimerForm({ open, timer, onClose }: TimerFormProps) {
       <DialogContent>
         <TextField fullWidth label="Label" value={label} onChange={(e) => setLabel(e.target.value)} margin="normal" />
         <Stack direction="row" spacing={2} sx={{ mt: 1 }}>
-          <TextField label="Hours" type="number" value={hours} onChange={(e) => setHours(parseInt(e.target.value) || 0)} inputProps={{ min: 0, max: 99 }} fullWidth />
-          <TextField label="Minutes" type="number" value={minutes} onChange={(e) => setMinutes(parseInt(e.target.value) || 0)} inputProps={{ min: 0, max: 59 }} fullWidth />
-          <TextField label="Seconds" type="number" value={seconds} onChange={(e) => setSeconds(parseInt(e.target.value) || 0)} inputProps={{ min: 0, max: 59 }} fullWidth />
+          <TextField label="Hours" type="number" value={hours} onChange={(e) => setHours(parseInt(e.target.value) || 0)} slotProps={{ htmlInput: { min: 0, max: 99 } }} fullWidth />
+          <TextField label="Minutes" type="number" value={minutes} onChange={(e) => setMinutes(parseInt(e.target.value) || 0)} slotProps={{ htmlInput: { min: 0, max: 59 } }} fullWidth />
+          <TextField label="Seconds" type="number" value={seconds} onChange={(e) => setSeconds(parseInt(e.target.value) || 0)} slotProps={{ htmlInput: { min: 0, max: 59 } }} fullWidth />
         </Stack>
       </DialogContent>
       <DialogActions>

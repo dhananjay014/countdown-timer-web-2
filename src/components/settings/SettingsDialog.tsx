@@ -22,7 +22,12 @@ interface SettingsDialogProps {
 }
 
 export function SettingsDialog({ open, onClose }: SettingsDialogProps) {
-  const { theme, soundEnabled, volume, setTheme, setSoundEnabled, setVolume } = useSettingsStore();
+  const theme = useSettingsStore((s) => s.theme);
+  const soundEnabled = useSettingsStore((s) => s.soundEnabled);
+  const volume = useSettingsStore((s) => s.volume);
+  const setTheme = useSettingsStore((s) => s.setTheme);
+  const setSoundEnabled = useSettingsStore((s) => s.setSoundEnabled);
+  const setVolume = useSettingsStore((s) => s.setVolume);
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="xs" fullWidth>

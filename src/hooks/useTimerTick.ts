@@ -3,9 +3,14 @@ import { useTimersStore } from '../stores/timersStore';
 
 const TICK_INTERVAL = 250;
 
+const selectHasRunning = (s: ReturnType<typeof useTimersStore.getState>) =>
+  s.timers.some((t) => t.status === 'running');
+
+const selectTickTimers = (s: ReturnType<typeof useTimersStore.getState>) => s.tickTimers;
+
 export function useTimerTick() {
-  const hasRunning = useTimersStore((s) => s.timers.some((t) => t.status === 'running'));
-  const tickTimers = useTimersStore((s) => s.tickTimers);
+  const hasRunning = useTimersStore(selectHasRunning);
+  const tickTimers = useTimersStore(selectTickTimers);
 
   useEffect(() => {
     if (!hasRunning) return;

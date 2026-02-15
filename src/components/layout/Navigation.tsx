@@ -11,7 +11,13 @@ interface NavigationProps {
 
 export function Navigation({ value, onChange }: NavigationProps) {
   return (
-    <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+    <Box sx={{
+      borderBottom: 1,
+      borderColor: 'divider',
+      '& .MuiTabs-indicator': {
+        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+      },
+    }}>
       <Tabs value={value} onChange={(_, v) => onChange(v)} centered>
         <Tab icon={<TimerIcon />} label="Timers" iconPosition="start" />
         <Tab icon={<EventIcon />} label="Events" iconPosition="start" />
