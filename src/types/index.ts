@@ -24,4 +24,13 @@ export interface Settings {
   soundEnabled: boolean;
   volume: number;
   theme: 'light' | 'dark' | 'system';
+  notificationsEnabled: boolean;
+}
+
+export type StopwatchStatus = 'idle' | 'running' | 'paused';
+
+export interface Lap {
+  id: number;
+  time: number; // lap split time in ms
+  total: number; // cumulative time in ms
 }

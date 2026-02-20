@@ -14,7 +14,9 @@ import LightModeIcon from '@mui/icons-material/LightMode';
 import DarkModeIcon from '@mui/icons-material/DarkMode';
 import SettingsBrightnessIcon from '@mui/icons-material/SettingsBrightness';
 import VolumeUpIcon from '@mui/icons-material/VolumeUp';
+import NotificationsIcon from '@mui/icons-material/Notifications';
 import { useSettingsStore } from '../../stores/settingsStore';
+import { requestNotificationPermission } from '../../hooks/useNotification';
 
 interface SettingsDialogProps {
   open: boolean;
@@ -25,9 +27,22 @@ export function SettingsDialog({ open, onClose }: SettingsDialogProps) {
   const theme = useSettingsStore((s) => s.theme);
   const soundEnabled = useSettingsStore((s) => s.soundEnabled);
   const volume = useSettingsStore((s) => s.volume);
+  const notificationsEnabled = useSettingsStore((s) => s.notificationsEnabled);
   const setTheme = useSettingsStore((s) => s.setTheme);
   const setSoundEnabled = useSettingsStore((s) => s.setSoundEnabled);
   const setVolume = useSettingsStore((s) => s.setVolume);
+  const setNotificationsEnabled = useSettingsStore((s) => s.setNotificationsEnabled);
+
+  const handleNotificationToggle = async (checked: boolean) => {
+    if (checked) {
+      const granted = await requestNotificationPermission();
+      setNotificationsEnabled(granted);
+    } else {
+      setNotificationsEnabled(false);
+    }
+  };
+
+  const notificationsDenied = 'Notification' in window && Notification.permission === 'denied';
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="xs" fullWidth>
@@ -65,6 +80,26 @@ export function SettingsDialog({ open, onClose }: SettingsDialogProps) {
                 disabled={!soundEnabled}
               />
               <Typography variant="body2" sx={{ minWidth: 30 }}>{volume}%</Typography>
+            </Stack>
+          </Box>
+          <Box>
+            <Stack direction="row" justifyContent="space-between" alignItems="center">
+              <Stack direction="row" spacing={1} alignItems="center">
+                <NotificationsIcon color={notificationsEnabled ? 'primary' : 'disabled'} fontSize="small" />
+                <Box>
+                  <Typography variant="subtitle2">Browser Notifications</Typography>
+                  {notificationsDenied && (
+                    <Typography variant="caption" color="error">
+                      Blocked by browser. Reset in site settings.
+                    </Typography>
+                  )}
+                </Box>
+              </Stack>
+              <Switch
+                checked={notificationsEnabled}
+                onChange={(e) => handleNotificationToggle(e.target.checked)}
+                disabled={notificationsDenied}
+              />
             </Stack>
           </Box>
         </Stack>

@@ -13,6 +13,7 @@ interface TimersState {
   startTimer: (id: string) => void;
   pauseTimer: (id: string) => void;
   resetTimer: (id: string) => void;
+  duplicateTimer: (id: string) => void;
   tickTimers: () => void;
   dismissAlarm: (id: string) => void;
   dismissAllAlarms: () => void;
@@ -96,6 +97,28 @@ export const useTimersStore = create<TimersState>()(
           ),
           completedTimerIds: state.completedTimerIds.filter((timerId) => timerId !== id),
         })),
+
+      duplicateTimer: (id) =>
+        set((state) => {
+          if (state.timers.length >= MAX_TIMERS) return state;
+          const source = state.timers.find((t) => t.id === id);
+          if (!source) return state;
+
+          const clone: Timer = {
+            id: generateId(),
+            label: source.label ? `${source.label} (copy)` : '',
+            hours: source.hours,
+            minutes: source.minutes,
+            seconds: source.seconds,
+            totalSeconds: source.totalSeconds,
+            remainingTime: source.totalSeconds,
+            endTime: null,
+            status: 'idle',
+            createdAt: Date.now(),
+          };
+
+          return { timers: [...state.timers, clone] };
+        }),
 
       tickTimers: () =>
         set((state) => {

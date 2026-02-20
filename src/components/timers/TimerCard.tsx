@@ -16,6 +16,7 @@ import PauseIcon from '@mui/icons-material/Pause';
 import ReplayIcon from '@mui/icons-material/Replay';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
+import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import type { Timer } from '../../types';
 import { useTimersStore } from '../../stores/timersStore';
 import { formatTime } from '../../utils/timeCalculations';
@@ -31,6 +32,7 @@ export const TimerCard = memo(function TimerCard({ timer, onEdit }: TimerCardPro
   const pauseTimer = useTimersStore((s) => s.pauseTimer);
   const resetTimer = useTimersStore((s) => s.resetTimer);
   const deleteTimer = useTimersStore((s) => s.deleteTimer);
+  const duplicateTimer = useTimersStore((s) => s.duplicateTimer);
   const [confirmOpen, setConfirmOpen] = useState(false);
 
   const progress = timer.totalSeconds > 0 ? timer.remainingTime / timer.totalSeconds : 0;
@@ -83,6 +85,7 @@ export const TimerCard = memo(function TimerCard({ timer, onEdit }: TimerCardPro
               </IconButton>
             )}
             <IconButton onClick={() => resetTimer(timer.id)}><ReplayIcon /></IconButton>
+            <IconButton onClick={() => duplicateTimer(timer.id)} aria-label="duplicate timer"><ContentCopyIcon /></IconButton>
             <IconButton color="error" onClick={() => setConfirmOpen(true)}><DeleteIcon /></IconButton>
           </Stack>
         </CardContent>

@@ -2,6 +2,7 @@ import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import TimerIcon from '@mui/icons-material/Timer';
 import EventIcon from '@mui/icons-material/Event';
+import AvTimerIcon from '@mui/icons-material/AvTimer';
 import Box from '@mui/material/Box';
 
 interface NavigationProps {
@@ -21,6 +22,7 @@ export function Navigation({ value, onChange }: NavigationProps) {
       <Tabs value={value} onChange={(_, v) => onChange(v)} centered>
         <Tab icon={<TimerIcon />} label="Timers" iconPosition="start" />
         <Tab icon={<EventIcon />} label="Events" iconPosition="start" />
+        <Tab icon={<AvTimerIcon />} label="Stopwatch" iconPosition="start" />
       </Tabs>
     </Box>
   );
