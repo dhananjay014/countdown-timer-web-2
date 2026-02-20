@@ -6,6 +6,7 @@ import { useTimersStore } from '../../stores/timersStore';
 import type { Timer } from '../../types';
 import { TimerCard } from './TimerCard';
 import { TimerForm } from './TimerForm';
+import { TimerPresets } from './TimerPresets';
 import { EmptyState } from '../common/EmptyState';
 
 export function TimerList() {
@@ -25,8 +26,9 @@ export function TimerList() {
 
   return (
     <Box>
+      <TimerPresets />
       {timers.length === 0 ? (
-        <EmptyState message="No timers yet" subtitle="Tap + to create your first timer" />
+        <EmptyState message="No timers yet" subtitle="Tap + to create your first timer, or use Quick Start above" />
       ) : (
         <Box sx={{ display: 'grid', gap: 2, gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)', lg: 'repeat(4, 1fr)' } }}>
           {timers.map((timer) => (

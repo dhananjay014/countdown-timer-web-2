@@ -5,4 +5,5 @@ export const DEFAULT_SETTINGS: import('../types').Settings = {
   soundEnabled: true,
   volume: 70,
   theme: 'system',
+  notificationsEnabled: false,
 };

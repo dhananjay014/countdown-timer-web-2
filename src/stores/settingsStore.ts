@@ -7,6 +7,7 @@ interface SettingsState extends Settings {
   setSoundEnabled: (enabled: boolean) => void;
   setVolume: (volume: number) => void;
   setTheme: (theme: 'light' | 'dark' | 'system') => void;
+  setNotificationsEnabled: (enabled: boolean) => void;
 }
 
 export const useSettingsStore = create<SettingsState>()(
@@ -15,6 +16,7 @@ export const useSettingsStore = create<SettingsState>()(
       soundEnabled: DEFAULT_SETTINGS.soundEnabled,
       volume: DEFAULT_SETTINGS.volume,
       theme: DEFAULT_SETTINGS.theme,
+      notificationsEnabled: DEFAULT_SETTINGS.notificationsEnabled,
 
       setSoundEnabled: (enabled) =>
         set(() => ({ soundEnabled: enabled })),
@@ -24,6 +26,9 @@ export const useSettingsStore = create<SettingsState>()(
 
       setTheme: (theme) =>
         set(() => ({ theme })),
+
+      setNotificationsEnabled: (enabled) =>
+        set(() => ({ notificationsEnabled: enabled })),
     }),
     {
       name: 'countdown-settings',
