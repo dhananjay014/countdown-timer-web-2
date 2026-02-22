@@ -16,7 +16,6 @@ export function SharedTimerDialog() {
   const navigate = useNavigate();
   const addTimer = useTimersStore((s) => s.addTimer);
   const startTimer = useTimersStore((s) => s.startTimer);
-  const timers = useTimersStore((s) => s.timers);
 
   const parsed = useMemo(() => decodeTimerUrl(location.search), [location.search]);
 
