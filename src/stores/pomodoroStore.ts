@@ -9,7 +9,7 @@ import type {
 } from '../types/pomodoro';
 import { generateId } from '../utils/timeCalculations';
 
-const DEFAULT_CONFIG: PomodoroConfig = {
+export const DEFAULT_CONFIG: PomodoroConfig = {
   workMinutes: 25,
   shortBreakMinutes: 5,
   longBreakMinutes: 15,
@@ -18,7 +18,7 @@ const DEFAULT_CONFIG: PomodoroConfig = {
   autoStartWork: false,
 };
 
-function getPhaseDuration(phase: PomodoroPhase, config: PomodoroConfig): number {
+export function getPhaseDuration(phase: PomodoroPhase, config: PomodoroConfig): number {
   switch (phase) {
     case 'work':
       return config.workMinutes * 60;
@@ -47,6 +47,33 @@ function getNextPhase(
   return { nextPhase: 'work', nextSession: currentSession + 1 };
 }
 
+/** Builds the state update for transitioning from the current phase to the next. */
+function buildPhaseTransition(
+  state: PomodoroState,
+  historyEntry: PomodoroSession | null,
+): Partial<PomodoroState> {
+  const { phase, currentSession, config, history, totalCompleted } = state;
+  const isWork = phase === 'work';
+
+  const newHistory = historyEntry ? [...history, historyEntry] : history;
+  const newTotalCompleted = isWork ? totalCompleted + 1 : totalCompleted;
+
+  const { nextPhase, nextSession } = getNextPhase(
+    phase,
+    currentSession,
+    config.sessionsBeforeLong,
+  );
+  const nextDuration = getPhaseDuration(nextPhase, config);
+
+  return {
+    phase: nextPhase,
+    currentSession: nextSession,
+    totalCompleted: newTotalCompleted,
+    remainingTime: nextDuration,
+    history: newHistory,
+  };
+}
+
 interface PomodoroActions {
   start: () => void;
   pause: () => void;
@@ -73,7 +100,6 @@ export const usePomodoroStore = create<PomodoroStore>()(
 
       start: () =>
         set((state) => {
-          if (state.status === 'running') return state;
           if (state.status !== 'idle' && state.status !== 'paused') return state;
           return {
             status: 'running' as const,
@@ -107,88 +133,55 @@ export const usePomodoroStore = create<PomodoroStore>()(
 
         const remaining = Math.ceil((state.endTime - Date.now()) / 1000);
 
-        if (remaining <= 0) {
-          // Phase complete - transition
-          const { phase, currentSession, config, history, totalCompleted } = state;
-          const isWork = phase === 'work';
-
-          // Record work sessions in history
-          const newHistory = isWork
-            ? [
-                ...history,
-                {
-                  id: generateId(),
-                  phase: phase,
-                  startedAt: state.endTime - getPhaseDuration(phase, config) * 1000,
-                  completedAt: Date.now(),
-                  durationSeconds: getPhaseDuration(phase, config),
-                } as PomodoroSession,
-              ]
-            : history;
-
-          const newTotalCompleted = isWork ? totalCompleted + 1 : totalCompleted;
-
-          const { nextPhase, nextSession } = getNextPhase(
-            phase,
-            isWork ? currentSession : currentSession,
-            config.sessionsBeforeLong
-          );
-          const nextDuration = getPhaseDuration(nextPhase, config);
-
-          const shouldAutoStart =
-            (nextPhase !== 'work' && config.autoStartBreaks) ||
-            (nextPhase === 'work' && config.autoStartWork);
-
-          set({
-            phase: nextPhase,
-            currentSession: nextSession,
-            totalCompleted: newTotalCompleted,
-            remainingTime: nextDuration,
-            endTime: shouldAutoStart ? Date.now() + nextDuration * 1000 : null,
-            status: shouldAutoStart ? ('running' as const) : ('idle' as const),
-            history: newHistory,
-          });
-        } else {
+        if (remaining > 0) {
           set({ remainingTime: remaining });
+          return;
         }
+
+        // Phase complete -- build history entry for work phases only
+        const { phase, config } = state;
+        const historyEntry: PomodoroSession | null = phase === 'work'
+          ? {
+              id: generateId(),
+              phase,
+              startedAt: state.endTime - getPhaseDuration(phase, config) * 1000,
+              completedAt: Date.now(),
+              durationSeconds: getPhaseDuration(phase, config),
+            }
+          : null;
+
+        const transition = buildPhaseTransition(state, historyEntry);
+
+        const shouldAutoStart =
+          (transition.phase !== 'work' && config.autoStartBreaks) ||
+          (transition.phase === 'work' && config.autoStartWork);
+
+        set({
+          ...transition,
+          endTime: shouldAutoStart ? Date.now() + transition.remainingTime! * 1000 : null,
+          status: shouldAutoStart ? 'running' : 'idle',
+        });
       },
 
       skipPhase: () =>
         set((state) => {
-          const { phase, currentSession, config, history, totalCompleted } = state;
-          const isWork = phase === 'work';
+          const { phase, config } = state;
+          const elapsed = getPhaseDuration(phase, config) - state.remainingTime;
 
-          // Record work sessions in history when skipping
-          const newHistory = isWork
-            ? [
-                ...history,
-                {
-                  id: generateId(),
-                  phase: phase,
-                  startedAt: Date.now() - (getPhaseDuration(phase, config) - state.remainingTime) * 1000,
-                  completedAt: Date.now(),
-                  durationSeconds: getPhaseDuration(phase, config) - state.remainingTime,
-                } as PomodoroSession,
-              ]
-            : history;
-
-          const newTotalCompleted = isWork ? totalCompleted + 1 : totalCompleted;
-
-          const { nextPhase, nextSession } = getNextPhase(
-            phase,
-            isWork ? currentSession : currentSession,
-            config.sessionsBeforeLong
-          );
-          const nextDuration = getPhaseDuration(nextPhase, config);
+          const historyEntry: PomodoroSession | null = phase === 'work'
+            ? {
+                id: generateId(),
+                phase,
+                startedAt: Date.now() - elapsed * 1000,
+                completedAt: Date.now(),
+                durationSeconds: elapsed,
+              }
+            : null;
 
           return {
-            phase: nextPhase,
-            currentSession: nextSession,
-            totalCompleted: newTotalCompleted,
-            remainingTime: nextDuration,
+            ...buildPhaseTransition(state, historyEntry),
             endTime: null,
             status: 'idle' as const,
-            history: newHistory,
           };
         }),
 

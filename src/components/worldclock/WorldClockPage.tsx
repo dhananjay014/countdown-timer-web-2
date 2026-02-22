@@ -16,29 +16,14 @@ export function WorldClockPage() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const initAttempted = useRef(false);
 
-  // Auto-add local timezone on first load when store has never been initialized
+  // Auto-add the user's local timezone on first visit (empty store)
   useEffect(() => {
-    if (initAttempted.current) return;
+    if (initAttempted.current || clocks.length > 0) return;
     initAttempted.current = true;
-
-    if (clocks.length > 0) return;
-
-    // If localStorage already has world-clocks data with clocks, the user
-    // has previously used the feature — don't auto-add again.
-    const stored = localStorage.getItem('world-clocks');
-    if (stored) {
-      try {
-        const parsed = JSON.parse(stored);
-        if (parsed.state?.clocks?.length > 0) return;
-      } catch {
-        // ignore parse errors
-      }
-    }
 
     const localTz = Intl.DateTimeFormat().resolvedOptions().timeZone;
     const match = TIMEZONE_OPTIONS.find((o) => o.timezone === localTz);
-    const label = match ? match.label : localTz;
-    addClock(localTz, label);
+    addClock(localTz, match ? match.label : localTz);
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (

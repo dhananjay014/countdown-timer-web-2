@@ -19,12 +19,13 @@ export const WorldClockCard = memo(function WorldClockCard({ clock }: WorldClock
 
   const [time, setTime] = useState(() => formatTimeInZone(clock.timezone));
   const [date, setDate] = useState(() => formatDateInZone(clock.timezone));
-  const [offset] = useState(() => getUtcOffset(clock.timezone));
+  const [offset, setOffset] = useState(() => getUtcOffset(clock.timezone));
 
   useEffect(() => {
     const id = setInterval(() => {
       setTime(formatTimeInZone(clock.timezone));
       setDate(formatDateInZone(clock.timezone));
+      setOffset(getUtcOffset(clock.timezone));
     }, 1000);
 
     return () => clearInterval(id);

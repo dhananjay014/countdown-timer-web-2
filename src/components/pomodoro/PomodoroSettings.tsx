@@ -9,16 +9,7 @@ import Button from '@mui/material/Button';
 import Stack from '@mui/material/Stack';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import { usePomodoroStore } from '../../stores/pomodoroStore';
-
-const DEFAULT_CONFIG = {
-  workMinutes: 25,
-  shortBreakMinutes: 5,
-  longBreakMinutes: 15,
-  sessionsBeforeLong: 4,
-  autoStartBreaks: false,
-  autoStartWork: false,
-};
+import { usePomodoroStore, DEFAULT_CONFIG } from '../../stores/pomodoroStore';
 
 export const PomodoroSettings = memo(function PomodoroSettings() {
   const status = usePomodoroStore((s) => s.status);

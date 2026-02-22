@@ -1,4 +1,4 @@
-import { memo, useState, useEffect, useRef } from 'react';
+import { memo, useState, useEffect } from 'react';
 import Dialog from '@mui/material/Dialog';
 import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
@@ -25,17 +25,14 @@ export const AddClockDialog = memo(function AddClockDialog({ open, onClose }: Ad
 
   const [selected, setSelected] = useState<TimezoneOption | null>(null);
   const [, setTick] = useState(0);
-  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  // Tick every second to update preview — driven by setTick forcing re-render
+  // Force re-render every second to keep the preview time current
   useEffect(() => {
-    if (intervalRef.current) clearInterval(intervalRef.current);
     if (!selected) return;
-    intervalRef.current = setInterval(() => setTick(t => t + 1), 1000);
-    return () => { if (intervalRef.current) clearInterval(intervalRef.current); };
+    const id = setInterval(() => setTick((t) => t + 1), 1000);
+    return () => clearInterval(id);
   }, [selected]);
 
-  // Derive preview from current state (no effect needed)
   const preview = selected
     ? `${formatTimeInZone(selected.timezone)} - ${formatDateInZone(selected.timezone)} (${getUtcOffset(selected.timezone)})`
     : '';

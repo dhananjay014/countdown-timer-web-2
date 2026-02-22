@@ -40,6 +40,7 @@ export function EmbedTimerPage() {
   const embedParams = useMemo(() => parseEmbedParams(search), [search]);
 
   const status = useEmbedTimerStore((s) => s.status);
+  const totalSeconds = useEmbedTimerStore((s) => s.totalSeconds);
   const init = useEmbedTimerStore((s) => s.init);
   const start = useEmbedTimerStore((s) => s.start);
   const tick = useEmbedTimerStore((s) => s.tick);
@@ -53,16 +54,16 @@ export function EmbedTimerPage() {
 
   // Auto-start for minimal mode after init
   useEffect(() => {
-    if (embedParams?.mode === 'minimal' && status === 'idle' && useEmbedTimerStore.getState().totalSeconds > 0) {
+    if (embedParams?.mode === 'minimal' && status === 'idle' && totalSeconds > 0) {
       start();
     }
-  }, [embedParams?.mode, status, start]);
+  }, [embedParams?.mode, status, totalSeconds, start]);
 
   // Tick interval when running
   useEffect(() => {
     if (status !== 'running') return;
-    const interval = setInterval(tick, 250);
-    return () => clearInterval(interval);
+    const id = setInterval(tick, 250);
+    return () => clearInterval(id);
   }, [status, tick]);
 
   if (!embedParams) {

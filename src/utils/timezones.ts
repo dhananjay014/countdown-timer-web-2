@@ -49,4 +49,4 @@ export const TIMEZONE_OPTIONS: ReadonlyArray<{ timezone: string; label: string }
   { timezone: 'Australia/Melbourne', label: 'Melbourne' },
   { timezone: 'Pacific/Auckland', label: 'Auckland' },
   { timezone: 'Pacific/Fiji', label: 'Fiji' },
-] as const;
+];

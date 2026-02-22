@@ -9,7 +9,7 @@ import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import PauseIcon from '@mui/icons-material/Pause';
 import SkipNextIcon from '@mui/icons-material/SkipNext';
 import ReplayIcon from '@mui/icons-material/Replay';
-import { usePomodoroStore } from '../../stores/pomodoroStore';
+import { usePomodoroStore, getPhaseDuration } from '../../stores/pomodoroStore';
 import { ProgressRing } from '../timers/ProgressRing';
 import type { PomodoroPhase } from '../../types/pomodoro';
 
@@ -41,16 +41,7 @@ function getPhaseColor(phase: PomodoroPhase): string {
   }
 }
 
-function getPhaseTotalSeconds(phase: PomodoroPhase, config: { workMinutes: number; shortBreakMinutes: number; longBreakMinutes: number }): number {
-  switch (phase) {
-    case 'work':
-      return config.workMinutes * 60;
-    case 'shortBreak':
-      return config.shortBreakMinutes * 60;
-    case 'longBreak':
-      return config.longBreakMinutes * 60;
-  }
-}
+const controlButtonSx = { bgcolor: 'action.hover', width: 56, height: 56 } as const;
 
 export const PomodoroDisplay = memo(function PomodoroDisplay() {
   const status = usePomodoroStore((s) => s.status);
@@ -63,14 +54,13 @@ export const PomodoroDisplay = memo(function PomodoroDisplay() {
   const reset = usePomodoroStore((s) => s.reset);
   const skipPhase = usePomodoroStore((s) => s.skipPhase);
 
-  const totalSeconds = getPhaseTotalSeconds(phase, config);
+  const totalSeconds = getPhaseDuration(phase, config);
   const progress = totalSeconds > 0 ? (totalSeconds - remainingTime) / totalSeconds : 0;
   const isRunning = status === 'running';
 
   return (
     <Card sx={{ width: '100%', maxWidth: 480, textAlign: 'center', mx: 'auto' }}>
       <CardContent sx={{ py: 4 }}>
-        {/* Phase label */}
         <Typography
           variant="h6"
           fontWeight={700}
@@ -79,7 +69,6 @@ export const PomodoroDisplay = memo(function PomodoroDisplay() {
           {getPhaseLabel(phase)}
         </Typography>
 
-        {/* Progress ring with countdown */}
         <Box sx={{ display: 'flex', justifyContent: 'center', mb: 3 }}>
           <ProgressRing progress={progress} size={220} strokeWidth={8}>
             <Typography
@@ -93,7 +82,6 @@ export const PomodoroDisplay = memo(function PomodoroDisplay() {
           </ProgressRing>
         </Box>
 
-        {/* Session dots */}
         <Stack direction="row" spacing={1} justifyContent="center" sx={{ mb: 3 }}>
           {Array.from({ length: config.sessionsBeforeLong }, (_, i) => (
             <Box
@@ -113,13 +101,12 @@ export const PomodoroDisplay = memo(function PomodoroDisplay() {
           ))}
         </Stack>
 
-        {/* Control buttons */}
         <Stack direction="row" spacing={2} justifyContent="center">
           {isRunning ? (
             <IconButton
               color="primary"
               onClick={pause}
-              sx={{ bgcolor: 'action.hover', width: 56, height: 56 }}
+              sx={controlButtonSx}
               aria-label="pause"
             >
               <PauseIcon fontSize="large" />
@@ -128,7 +115,7 @@ export const PomodoroDisplay = memo(function PomodoroDisplay() {
             <IconButton
               color="primary"
               onClick={start}
-              sx={{ bgcolor: 'action.hover', width: 56, height: 56 }}
+              sx={controlButtonSx}
               aria-label="start"
             >
               <PlayArrowIcon fontSize="large" />
@@ -137,7 +124,7 @@ export const PomodoroDisplay = memo(function PomodoroDisplay() {
 
           <IconButton
             onClick={skipPhase}
-            sx={{ bgcolor: 'action.hover', width: 56, height: 56 }}
+            sx={controlButtonSx}
             aria-label="skip"
           >
             <SkipNextIcon fontSize="large" />
@@ -145,7 +132,7 @@ export const PomodoroDisplay = memo(function PomodoroDisplay() {
 
           <IconButton
             onClick={reset}
-            sx={{ bgcolor: 'action.hover', width: 56, height: 56 }}
+            sx={controlButtonSx}
             aria-label="reset"
           >
             <ReplayIcon fontSize="large" />
