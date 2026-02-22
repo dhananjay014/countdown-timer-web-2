@@ -1,4 +1,5 @@
-import { useState, useMemo } from 'react';
+import { useMemo } from 'react';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import { ThemeProvider } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import useMediaQuery from '@mui/material/useMediaQuery';
@@ -6,16 +7,13 @@ import { useSettingsStore } from './stores/settingsStore';
 import { useTimerTick } from './hooks/useTimerTick';
 import { useNotification } from './hooks/useNotification';
 import { lightTheme, darkTheme } from './theme';
-import { AppLayout } from './components/layout/AppLayout';
-import { TimerList } from './components/timers/TimerList';
-import { EventList } from './components/events/EventList';
-import { Stopwatch } from './components/stopwatch/Stopwatch';
-import { SettingsDialog } from './components/settings/SettingsDialog';
+import { HomePage } from './pages/HomePage';
 import { AlarmOverlay } from './components/common/AlarmOverlay';
+import { ShareTimerRoute } from './components/share/ShareTimerRoute';
+import { ShareEventRoute } from './components/share/ShareEventRoute';
+import { EmbedTimerPage } from './components/embed/EmbedTimerPage';
 
 export default function App() {
-  const [tab, setTab] = useState(0);
-  const [settingsOpen, setSettingsOpen] = useState(false);
   const themePreference = useSettingsStore((s) => s.theme);
   const prefersDark = useMediaQuery('(prefers-color-scheme: dark)');
 
@@ -31,12 +29,13 @@ export default function App() {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <AppLayout tab={tab} onTabChange={setTab} onOpenSettings={() => setSettingsOpen(true)}>
-        {tab === 0 && <TimerList />}
-        {tab === 1 && <EventList />}
-        {tab === 2 && <Stopwatch />}
-      </AppLayout>
-      <SettingsDialog open={settingsOpen} onClose={() => setSettingsOpen(false)} />
+      <Routes>
+        <Route path="/" element={<HomePage />} />
+        <Route path="/t" element={<ShareTimerRoute />} />
+        <Route path="/e" element={<ShareEventRoute />} />
+        <Route path="/embed/timer" element={<EmbedTimerPage />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
       <AlarmOverlay />
     </ThemeProvider>
   );

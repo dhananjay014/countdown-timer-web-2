@@ -1,4 +1,4 @@
-import { memo, useState, useMemo } from 'react';
+import { memo, useState, useCallback, useMemo } from 'react';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
 import Typography from '@mui/material/Typography';
@@ -12,11 +12,14 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogActions from '@mui/material/DialogActions';
 import Button from '@mui/material/Button';
+import Snackbar from '@mui/material/Snackbar';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
+import ShareIcon from '@mui/icons-material/Share';
 import type { CountdownEvent } from '../../types';
 import { useEventsStore } from '../../stores/eventsStore';
 import { formatEventRemaining } from '../../utils/timeCalculations';
+import { encodeEventUrl } from '../../utils/shareUrl';
 import { useEventTick } from '../../hooks/useEventTick';
 import { formatDateDisplay } from '../../utils/dateFormat';
 
@@ -28,6 +31,12 @@ interface EventCardProps {
 export const EventCard = memo(function EventCard({ event, onEdit }: EventCardProps) {
   const deleteEvent = useEventsStore((s) => s.deleteEvent);
   const [confirmOpen, setConfirmOpen] = useState(false);
+  const [snackOpen, setSnackOpen] = useState(false);
+
+  const handleShare = useCallback(() => {
+    const url = encodeEventUrl(event.name, event.targetDate);
+    navigator.clipboard.writeText(url).then(() => setSnackOpen(true));
+  }, [event.name, event.targetDate]);
 
   // Single shared tick drives all event cards - no per-card interval
   const tick = useEventTick();
@@ -61,6 +70,7 @@ export const EventCard = memo(function EventCard({ event, onEdit }: EventCardPro
             </Box>
             <Stack direction="row">
               <IconButton size="small" onClick={() => onEdit(event)}><EditIcon fontSize="small" /></IconButton>
+              <IconButton size="small" onClick={handleShare} aria-label="share event"><ShareIcon fontSize="small" /></IconButton>
               <IconButton size="small" color="error" onClick={() => setConfirmOpen(true)}><DeleteIcon fontSize="small" /></IconButton>
             </Stack>
           </Box>
@@ -78,6 +88,12 @@ export const EventCard = memo(function EventCard({ event, onEdit }: EventCardPro
           <Button color="error" variant="contained" onClick={() => { deleteEvent(event.id); setConfirmOpen(false); }}>Delete</Button>
         </DialogActions>
       </Dialog>
+      <Snackbar
+        open={snackOpen}
+        autoHideDuration={2000}
+        onClose={() => setSnackOpen(false)}
+        message="Link copied!"
+      />
     </>
   );
 });

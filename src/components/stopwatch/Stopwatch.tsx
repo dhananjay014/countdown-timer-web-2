@@ -38,13 +38,13 @@ export function Stopwatch() {
   const reset = useStopwatchStore((s) => s.reset);
   const lap = useStopwatchStore((s) => s.lap);
 
-  const [display, setDisplay] = useState('00:00.00');
+  const [display, setDisplay] = useState(() => formatMs(getElapsed()));
+
+  // Sync display on status change (non-running) without effect
+  const displayValue = status !== 'running' ? formatMs(getElapsed()) : display;
 
   useEffect(() => {
-    if (status !== 'running') {
-      setDisplay(formatMs(getElapsed()));
-      return;
-    }
+    if (status !== 'running') return;
 
     const id = setInterval(() => {
       setDisplay(formatMs(getElapsed()));
@@ -70,7 +70,7 @@ export function Stopwatch() {
               mb: 3,
             }}
           >
-            {display}
+            {displayValue}
           </Typography>
 
           <Stack direction="row" spacing={2} justifyContent="center">

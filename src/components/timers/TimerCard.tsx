@@ -11,16 +11,21 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogActions from '@mui/material/DialogActions';
 import Button from '@mui/material/Button';
+import Snackbar from '@mui/material/Snackbar';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import PauseIcon from '@mui/icons-material/Pause';
 import ReplayIcon from '@mui/icons-material/Replay';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
+import ShareIcon from '@mui/icons-material/Share';
+import CodeIcon from '@mui/icons-material/Code';
 import type { Timer } from '../../types';
 import { useTimersStore } from '../../stores/timersStore';
 import { formatTime } from '../../utils/timeCalculations';
+import { encodeTimerUrl } from '../../utils/shareUrl';
 import { ProgressRing } from './ProgressRing';
+import { GetEmbedCodeDialog } from '../embed/GetEmbedCodeDialog';
 
 interface TimerCardProps {
   timer: Timer;
@@ -34,6 +39,8 @@ export const TimerCard = memo(function TimerCard({ timer, onEdit }: TimerCardPro
   const deleteTimer = useTimersStore((s) => s.deleteTimer);
   const duplicateTimer = useTimersStore((s) => s.duplicateTimer);
   const [confirmOpen, setConfirmOpen] = useState(false);
+  const [snackOpen, setSnackOpen] = useState(false);
+  const [embedOpen, setEmbedOpen] = useState(false);
 
   const progress = timer.totalSeconds > 0 ? timer.remainingTime / timer.totalSeconds : 0;
   const isCompleted = timer.status === 'completed';
@@ -43,6 +50,11 @@ export const TimerCard = memo(function TimerCard({ timer, onEdit }: TimerCardPro
     deleteTimer(timer.id);
     setConfirmOpen(false);
   }, [deleteTimer, timer.id]);
+
+  const handleShare = useCallback(() => {
+    const url = encodeTimerUrl(timer.label, timer.totalSeconds);
+    navigator.clipboard.writeText(url).then(() => setSnackOpen(true));
+  }, [timer.label, timer.totalSeconds]);
 
   return (
     <>
@@ -86,6 +98,8 @@ export const TimerCard = memo(function TimerCard({ timer, onEdit }: TimerCardPro
             )}
             <IconButton onClick={() => resetTimer(timer.id)}><ReplayIcon /></IconButton>
             <IconButton onClick={() => duplicateTimer(timer.id)} aria-label="duplicate timer"><ContentCopyIcon /></IconButton>
+            <IconButton onClick={handleShare} aria-label="share timer"><ShareIcon /></IconButton>
+            <IconButton onClick={() => setEmbedOpen(true)} aria-label="get embed code"><CodeIcon /></IconButton>
             <IconButton color="error" onClick={() => setConfirmOpen(true)}><DeleteIcon /></IconButton>
           </Stack>
         </CardContent>
@@ -102,6 +116,18 @@ export const TimerCard = memo(function TimerCard({ timer, onEdit }: TimerCardPro
           <Button color="error" variant="contained" onClick={handleDelete}>Delete</Button>
         </DialogActions>
       </Dialog>
+      <Snackbar
+        open={snackOpen}
+        autoHideDuration={2000}
+        onClose={() => setSnackOpen(false)}
+        message="Link copied!"
+      />
+      <GetEmbedCodeDialog
+        open={embedOpen}
+        onClose={() => setEmbedOpen(false)}
+        timerLabel={timer.label}
+        timerTotalSeconds={timer.totalSeconds}
+      />
     </>
   );
 });
