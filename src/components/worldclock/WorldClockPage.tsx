@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Fab from '@mui/material/Fab';
@@ -14,12 +14,17 @@ export function WorldClockPage() {
   const clocks = useWorldClockStore((s) => s.clocks);
   const addClock = useWorldClockStore((s) => s.addClock);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const initAttempted = useRef(false);
 
-  // Auto-add local timezone on first load
+  // Auto-add local timezone on first load when store has never been initialized
   useEffect(() => {
+    if (initAttempted.current) return;
+    initAttempted.current = true;
+
     if (clocks.length > 0) return;
 
-    // Check if the store has ever been hydrated with data
+    // If localStorage already has world-clocks data with clocks, the user
+    // has previously used the feature — don't auto-add again.
     const stored = localStorage.getItem('world-clocks');
     if (stored) {
       try {
