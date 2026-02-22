@@ -4,6 +4,7 @@ import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
 import TimerIcon from '@mui/icons-material/Timer';
 import { useTimersStore } from '../../stores/timersStore';
+import { MAX_TIMERS } from '../../utils/constants';
 
 const PRESETS = [
   { label: '1 min', hours: 0, minutes: 1, seconds: 0 },
@@ -45,7 +46,7 @@ export function TimerPresets() {
             onClick={() => handlePreset(preset)}
             variant="outlined"
             color="primary"
-            disabled={timers.length >= 20}
+            disabled={timers.length >= MAX_TIMERS}
             sx={{
               fontWeight: 500,
               transition: 'all 0.2s ease',

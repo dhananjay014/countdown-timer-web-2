@@ -38,6 +38,7 @@ export const TimerCard = memo(function TimerCard({ timer, onEdit }: TimerCardPro
   const progress = timer.totalSeconds > 0 ? timer.remainingTime / timer.totalSeconds : 0;
   const isCompleted = timer.status === 'completed';
   const isRunning = timer.status === 'running';
+  const isIdle = timer.status === 'idle';
 
   const handleDelete = useCallback(() => {
     deleteTimer(timer.id);
@@ -67,7 +68,7 @@ export const TimerCard = memo(function TimerCard({ timer, onEdit }: TimerCardPro
             <Typography variant="subtitle1" fontWeight={600} noWrap sx={{ flex: 1 }}>
               {timer.label || 'Timer'}
             </Typography>
-            <IconButton size="small" onClick={() => onEdit(timer)}><EditIcon fontSize="small" /></IconButton>
+            <IconButton size="small" onClick={() => onEdit(timer)} disabled={!isIdle}><EditIcon fontSize="small" /></IconButton>
           </Box>
           <Box sx={{ display: 'flex', justifyContent: 'center', mb: 2 }}>
             <ProgressRing progress={progress}>

@@ -6,6 +6,7 @@ import DialogActions from '@mui/material/DialogActions';
 import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
 import Stack from '@mui/material/Stack';
+import Alert from '@mui/material/Alert';
 import type { CountdownEvent } from '../../types';
 import { useEventsStore } from '../../stores/eventsStore';
 import { toDateInputValue, toTimeInputValue } from '../../utils/dateFormat';
@@ -32,6 +33,7 @@ export function EventForm({ open, event, onClose }: EventFormProps) {
   const [name, setName] = useState(defaults.name);
   const [date, setDate] = useState(defaults.date);
   const [time, setTime] = useState(defaults.time);
+  const [error, setError] = useState('');
 
   // Reset form when dialog opens with new data
   const [prevKey, setPrevKey] = useState<string | null>(null);
@@ -43,14 +45,22 @@ export function EventForm({ open, event, onClose }: EventFormProps) {
       setName(d.name);
       setDate(d.date);
       setTime(d.time);
+      setError('');
     }
   }
 
   const handleSave = () => {
+    setError('');
     if (!name.trim() || !date) return;
     const [year, month, day] = date.split('-').map(Number);
     const [hour, minute] = (time || '00:00').split(':').map(Number);
     const targetDate = new Date(year, month - 1, day, hour, minute).getTime();
+
+    if (targetDate <= Date.now()) {
+      setError('Event date must be in the future');
+      return;
+    }
+
     if (event) {
       updateEvent(event.id, name.trim(), targetDate);
     } else {
@@ -63,6 +73,7 @@ export function EventForm({ open, event, onClose }: EventFormProps) {
     <Dialog open={open} onClose={onClose} maxWidth="xs" fullWidth>
       <DialogTitle>{event ? 'Edit Event' : 'New Event'}</DialogTitle>
       <DialogContent>
+        {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
         <TextField fullWidth label="Event Name" value={name} onChange={(e) => setName(e.target.value)} margin="normal" />
         <Stack direction="row" spacing={2} sx={{ mt: 1 }}>
           <TextField label="Date" type="date" value={date} onChange={(e) => setDate(e.target.value)} fullWidth slotProps={{ inputLabel: { shrink: true } }} />

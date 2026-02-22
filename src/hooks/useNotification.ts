@@ -13,7 +13,7 @@ export function useNotification() {
     try {
       new Notification(title, {
         body,
-        icon: '/favicon.ico',
+        icon: '/favicon.svg',
         tag: 'timer-complete',
       });
     } catch {
