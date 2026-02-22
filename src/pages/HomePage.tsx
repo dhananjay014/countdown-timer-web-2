@@ -5,6 +5,7 @@ import { AppLayout } from '../components/layout/AppLayout';
 import { TimerList } from '../components/timers/TimerList';
 import { EventList } from '../components/events/EventList';
 import { Stopwatch } from '../components/stopwatch/Stopwatch';
+import { WorldClockPage } from '../components/worldclock/WorldClockPage';
 
 export function HomePage() {
   const [tab, setTab] = useState(0);
@@ -20,12 +21,7 @@ export function HomePage() {
           <Typography variant="h6" color="text.secondary">Pomodoro — Coming Soon</Typography>
         </Box>
       )}
-      {/* World Clock placeholder — Feature 3 will replace this */}
-      {tab === 3 && (
-        <Box sx={{ textAlign: 'center', py: 8 }}>
-          <Typography variant="h6" color="text.secondary">World Clock — Coming Soon</Typography>
-        </Box>
-      )}
+      {tab === 3 && <WorldClockPage />}
       {tab === 4 && <Stopwatch />}
     </AppLayout>
   );
