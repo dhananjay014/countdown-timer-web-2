@@ -35,7 +35,7 @@ export function AlarmOverlay() {
   if (!isOpen) return null;
 
   return (
-    <Dialog open={isOpen} onClose={handleDismiss} maxWidth="sm" fullWidth>
+    <Dialog open={isOpen} onClose={handleDismiss} maxWidth="sm" fullWidth aria-labelledby="alarm-dialog-title">
       <DialogContent>
         <Box sx={{
           textAlign: 'center', py: 4,
@@ -54,7 +54,7 @@ export function AlarmOverlay() {
               '75%': { transform: 'rotate(10deg)' },
             },
           }} />
-          <Typography variant="h3" fontWeight={700} gutterBottom>
+          <Typography id="alarm-dialog-title" variant="h3" fontWeight={700} gutterBottom>
             Time's Up!
           </Typography>
           {completedTimers.map((t) => (
@@ -62,7 +62,7 @@ export function AlarmOverlay() {
               {t.label || 'Timer'}
             </Typography>
           ))}
-          <Button variant="contained" size="large" onClick={handleDismiss} sx={{ mt: 4, px: 6 }}>
+          <Button autoFocus variant="contained" size="large" onClick={handleDismiss} sx={{ mt: 4, px: 6 }}>
             Dismiss
           </Button>
         </Box>
