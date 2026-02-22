@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import { ThemeProvider } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
@@ -45,9 +45,12 @@ export function EmbedTimerPage() {
   const start = useEmbedTimerStore((s) => s.start);
   const tick = useEmbedTimerStore((s) => s.tick);
 
-  // Initialize store from URL params on mount
+  const initialized = useRef(false);
+
+  // Initialize store from URL params on mount (once only)
   useEffect(() => {
-    if (embedParams) {
+    if (embedParams && !initialized.current) {
+      initialized.current = true;
       init(embedParams.label, embedParams.duration);
     }
   }, [embedParams, init]);

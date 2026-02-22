@@ -288,6 +288,7 @@ describe('pomodoroStore', () => {
     it('records work session in history when skipping work phase', () => {
       getState().start();
       vi.advanceTimersByTime(5000);
+      getState().tick(); // update remainingTime so elapsed > 0
       getState().skipPhase();
 
       const { history } = getState();

@@ -56,7 +56,7 @@ function buildPhaseTransition(
   const isWork = phase === 'work';
 
   const newHistory = historyEntry ? [...history, historyEntry] : history;
-  const newTotalCompleted = isWork ? totalCompleted + 1 : totalCompleted;
+  const newTotalCompleted = (isWork && historyEntry) ? totalCompleted + 1 : totalCompleted;
 
   const { nextPhase, nextSession } = getNextPhase(
     phase,
@@ -168,7 +168,7 @@ export const usePomodoroStore = create<PomodoroStore>()(
           const { phase, config } = state;
           const elapsed = getPhaseDuration(phase, config) - state.remainingTime;
 
-          const historyEntry: PomodoroSession | null = phase === 'work'
+          const historyEntry: PomodoroSession | null = (phase === 'work' && elapsed > 0)
             ? {
                 id: generateId(),
                 phase,
