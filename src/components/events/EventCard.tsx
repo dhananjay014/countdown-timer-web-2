@@ -50,7 +50,7 @@ export const EventCard = memo(function EventCard({ event, onEdit }: EventCardPro
         <CardContent>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
             <Box sx={{ flex: 1 }}>
-              <Typography variant="h6" fontWeight={600}>{event.name}</Typography>
+              <Typography variant="h6" fontWeight={600} noWrap>{event.name || 'Event'}</Typography>
               <Typography variant="body2" color="text.secondary">
                 {formatDateDisplay(event.targetDate)}
               </Typography>
@@ -60,8 +60,8 @@ export const EventCard = memo(function EventCard({ event, onEdit }: EventCardPro
               {isPast && <Chip label="Completed" size="small" color="success" sx={{ mt: 1 }} />}
             </Box>
             <Stack direction="row">
-              <IconButton size="small" onClick={() => onEdit(event)}><EditIcon fontSize="small" /></IconButton>
-              <IconButton size="small" color="error" onClick={() => setConfirmOpen(true)}><DeleteIcon fontSize="small" /></IconButton>
+              <IconButton size="small" onClick={() => onEdit(event)} aria-label="Edit event"><EditIcon fontSize="small" /></IconButton>
+              <IconButton size="small" color="error" onClick={() => setConfirmOpen(true)} aria-label="Delete event"><DeleteIcon fontSize="small" /></IconButton>
             </Stack>
           </Box>
         </CardContent>
@@ -70,7 +70,7 @@ export const EventCard = memo(function EventCard({ event, onEdit }: EventCardPro
         <DialogTitle>Delete Event</DialogTitle>
         <DialogContent>
           <DialogContentText>
-            Are you sure you want to delete "{event.name}"? This cannot be undone.
+            Are you sure you want to delete "{event.name || 'Event'}"? This cannot be undone.
           </DialogContentText>
         </DialogContent>
         <DialogActions>

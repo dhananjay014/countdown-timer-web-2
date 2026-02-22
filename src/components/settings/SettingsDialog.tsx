@@ -45,8 +45,8 @@ export function SettingsDialog({ open, onClose }: SettingsDialogProps) {
   const notificationsDenied = 'Notification' in window && Notification.permission === 'denied';
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="xs" fullWidth>
-      <DialogTitle>Settings</DialogTitle>
+    <Dialog open={open} onClose={onClose} maxWidth="xs" fullWidth aria-labelledby="settings-dialog-title">
+      <DialogTitle id="settings-dialog-title">Settings</DialogTitle>
       <DialogContent>
         <Stack spacing={3} sx={{ mt: 1 }}>
           <Box>
@@ -66,7 +66,7 @@ export function SettingsDialog({ open, onClose }: SettingsDialogProps) {
           <Box>
             <Stack direction="row" justifyContent="space-between" alignItems="center">
               <Typography variant="subtitle2">Sound</Typography>
-              <Switch checked={soundEnabled} onChange={(e) => setSoundEnabled(e.target.checked)} />
+              <Switch checked={soundEnabled} onChange={(e) => setSoundEnabled(e.target.checked)} slotProps={{ input: { 'aria-label': 'Enable sound' } }} />
             </Stack>
           </Box>
           <Box>
@@ -99,13 +99,14 @@ export function SettingsDialog({ open, onClose }: SettingsDialogProps) {
                 checked={notificationsEnabled}
                 onChange={(e) => handleNotificationToggle(e.target.checked)}
                 disabled={notificationsDenied}
+                slotProps={{ input: { 'aria-label': 'Enable browser notifications' } }}
               />
             </Stack>
           </Box>
         </Stack>
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose}>Close</Button>
+        <Button autoFocus onClick={onClose}>Close</Button>
       </DialogActions>
     </Dialog>
   );

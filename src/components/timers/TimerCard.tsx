@@ -51,15 +51,15 @@ export const TimerCard = memo(function TimerCard({ timer, onEdit }: TimerCardPro
         p: 1,
         transition: 'box-shadow 0.3s ease, transform 0.2s ease',
         '&:hover': { boxShadow: 6, transform: 'translateY(-2px)' },
+        '@keyframes completedGlow': {
+          '0%': { boxShadow: '0 0 5px rgba(244, 67, 54, 0.3)' },
+          '100%': { boxShadow: '0 0 20px rgba(244, 67, 54, 0.6)' },
+        },
         ...(isCompleted && {
           borderColor: 'error.main',
           borderWidth: 2,
           borderStyle: 'solid',
           animation: 'completedGlow 2s ease-in-out infinite alternate',
-          '@keyframes completedGlow': {
-            '0%': { boxShadow: '0 0 5px rgba(244, 67, 54, 0.3)' },
-            '100%': { boxShadow: '0 0 20px rgba(244, 67, 54, 0.6)' },
-          },
         }),
       }}>
         <CardContent>
@@ -67,7 +67,7 @@ export const TimerCard = memo(function TimerCard({ timer, onEdit }: TimerCardPro
             <Typography variant="subtitle1" fontWeight={600} noWrap sx={{ flex: 1 }}>
               {timer.label || 'Timer'}
             </Typography>
-            <IconButton size="small" onClick={() => onEdit(timer)}><EditIcon fontSize="small" /></IconButton>
+            <IconButton size="small" onClick={() => onEdit(timer)} aria-label="Edit timer"><EditIcon fontSize="small" /></IconButton>
           </Box>
           <Box sx={{ display: 'flex', justifyContent: 'center', mb: 2 }}>
             <ProgressRing progress={progress}>
@@ -78,15 +78,15 @@ export const TimerCard = memo(function TimerCard({ timer, onEdit }: TimerCardPro
           </Box>
           <Stack direction="row" spacing={1} justifyContent="center">
             {isRunning ? (
-              <IconButton color="primary" onClick={() => pauseTimer(timer.id)}><PauseIcon /></IconButton>
+              <IconButton color="primary" onClick={() => pauseTimer(timer.id)} aria-label="Pause timer"><PauseIcon /></IconButton>
             ) : (
-              <IconButton color="primary" onClick={() => startTimer(timer.id)} disabled={isCompleted && timer.remainingTime <= 0}>
+              <IconButton color="primary" onClick={() => startTimer(timer.id)} disabled={isCompleted && timer.remainingTime <= 0} aria-label="Start timer">
                 <PlayArrowIcon />
               </IconButton>
             )}
-            <IconButton onClick={() => resetTimer(timer.id)}><ReplayIcon /></IconButton>
-            <IconButton onClick={() => duplicateTimer(timer.id)} aria-label="duplicate timer"><ContentCopyIcon /></IconButton>
-            <IconButton color="error" onClick={() => setConfirmOpen(true)}><DeleteIcon /></IconButton>
+            <IconButton onClick={() => resetTimer(timer.id)} aria-label="Reset timer"><ReplayIcon /></IconButton>
+            <IconButton onClick={() => duplicateTimer(timer.id)} aria-label="Duplicate timer"><ContentCopyIcon /></IconButton>
+            <IconButton color="error" onClick={() => setConfirmOpen(true)} aria-label="Delete timer"><DeleteIcon /></IconButton>
           </Stack>
         </CardContent>
       </Card>
