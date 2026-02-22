@@ -127,7 +127,6 @@ export const usePomodoroStore = create<PomodoroStore>()(
             : history;
 
           const newTotalCompleted = isWork ? totalCompleted + 1 : totalCompleted;
-          const newCurrentSession = isWork ? currentSession : currentSession;
 
           const { nextPhase, nextSession } = getNextPhase(
             phase,
