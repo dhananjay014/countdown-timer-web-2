@@ -19,11 +19,13 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import ShareIcon from '@mui/icons-material/Share';
+import CodeIcon from '@mui/icons-material/Code';
 import type { Timer } from '../../types';
 import { useTimersStore } from '../../stores/timersStore';
 import { formatTime } from '../../utils/timeCalculations';
 import { encodeTimerUrl } from '../../utils/shareUrl';
 import { ProgressRing } from './ProgressRing';
+import { GetEmbedCodeDialog } from '../embed/GetEmbedCodeDialog';
 
 interface TimerCardProps {
   timer: Timer;
@@ -38,6 +40,7 @@ export const TimerCard = memo(function TimerCard({ timer, onEdit }: TimerCardPro
   const duplicateTimer = useTimersStore((s) => s.duplicateTimer);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [snackOpen, setSnackOpen] = useState(false);
+  const [embedOpen, setEmbedOpen] = useState(false);
 
   const progress = timer.totalSeconds > 0 ? timer.remainingTime / timer.totalSeconds : 0;
   const isCompleted = timer.status === 'completed';
@@ -96,6 +99,7 @@ export const TimerCard = memo(function TimerCard({ timer, onEdit }: TimerCardPro
             <IconButton onClick={() => resetTimer(timer.id)}><ReplayIcon /></IconButton>
             <IconButton onClick={() => duplicateTimer(timer.id)} aria-label="duplicate timer"><ContentCopyIcon /></IconButton>
             <IconButton onClick={handleShare} aria-label="share timer"><ShareIcon /></IconButton>
+            <IconButton onClick={() => setEmbedOpen(true)} aria-label="get embed code"><CodeIcon /></IconButton>
             <IconButton color="error" onClick={() => setConfirmOpen(true)}><DeleteIcon /></IconButton>
           </Stack>
         </CardContent>
@@ -117,6 +121,12 @@ export const TimerCard = memo(function TimerCard({ timer, onEdit }: TimerCardPro
         autoHideDuration={2000}
         onClose={() => setSnackOpen(false)}
         message="Link copied!"
+      />
+      <GetEmbedCodeDialog
+        open={embedOpen}
+        onClose={() => setEmbedOpen(false)}
+        timerLabel={timer.label}
+        timerTotalSeconds={timer.totalSeconds}
       />
     </>
   );
