@@ -1,4 +1,4 @@
-import { memo, useState, useEffect } from 'react';
+import { memo, useState, useEffect, useRef } from 'react';
 import Dialog from '@mui/material/Dialog';
 import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
@@ -24,28 +24,24 @@ export const AddClockDialog = memo(function AddClockDialog({ open, onClose }: Ad
   const addClock = useWorldClockStore((s) => s.addClock);
 
   const [selected, setSelected] = useState<TimezoneOption | null>(null);
-  const [preview, setPreview] = useState('');
+  const [, setTick] = useState(0);
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  // Tick every second to update preview — driven by setTick forcing re-render
+  useEffect(() => {
+    if (intervalRef.current) clearInterval(intervalRef.current);
+    if (!selected) return;
+    intervalRef.current = setInterval(() => setTick(t => t + 1), 1000);
+    return () => { if (intervalRef.current) clearInterval(intervalRef.current); };
+  }, [selected]);
+
+  // Derive preview from current state (no effect needed)
+  const preview = selected
+    ? `${formatTimeInZone(selected.timezone)} - ${formatDateInZone(selected.timezone)} (${getUtcOffset(selected.timezone)})`
+    : '';
 
   const isDuplicate = selected ? clocks.some(c => c.timezone === selected.timezone) : false;
   const isDisabled = !selected || isDuplicate;
-
-  useEffect(() => {
-    if (!selected) {
-      setPreview('');
-      return;
-    }
-
-    const updatePreview = () => {
-      const time = formatTimeInZone(selected.timezone);
-      const date = formatDateInZone(selected.timezone);
-      const offset = getUtcOffset(selected.timezone);
-      setPreview(`${time} - ${date} (${offset})`);
-    };
-
-    updatePreview();
-    const id = setInterval(updatePreview, 1000);
-    return () => clearInterval(id);
-  }, [selected]);
 
   const handleAdd = () => {
     if (selected && !isDuplicate) {

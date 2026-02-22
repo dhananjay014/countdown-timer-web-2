@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import Dialog from '@mui/material/Dialog';
 import DialogTitle from '@mui/material/DialogTitle';
@@ -16,9 +16,10 @@ export function SharedEventDialog() {
   const location = useLocation();
   const navigate = useNavigate();
   const addEvent = useEventsStore((s) => s.addEvent);
+  const [now] = useState(() => Date.now());
 
   const parsed = useMemo(() => decodeEventUrl(location.search), [location.search]);
-  const isPast = parsed ? parsed.targetDate <= Date.now() : false;
+  const isPast = parsed ? parsed.targetDate <= now : false;
 
   const handleAdd = () => {
     if (!parsed) return;
